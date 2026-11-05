@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MediaType {
+  MOVIE
+  TV_SHOW
+}
+
+enum MediaSource {
+  TMDB
+  MANUAL
+}
+
+enum PublishStatus {
+  PUBLISHED
+  DRAFT
+}
+
+enum Category {
+  TRENDING
+  LATEST
+  TOP_RATED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  templates ExportTemplate[]
+}
+
+model Genre {
+  id     String  @id @default(cuid())
+  name   String
+  tmdbId Int?    @unique
+  movies Movie[]
+}
+
+model Movie {
+  id            String       @id @default(cuid())
+  tmdbId        Int?         @unique
+  title         String
+  originalTitle String?
+  overview      String?
+  posterUrl     String?
+  backdropUrl   String?
+  trailerUrl    String?
+  duration      Int?
+  language      String?
+  releaseDate   DateTime?
+  popularity    Float?
+  voteAverage   Float?
+  voteCount     Int?
+  actors        String?
+  director      String?
+  type          MediaType    @default(MOVIE)
+  source        MediaSource  @default(MANUAL)
+  status        PublishStatus @default(DRAFT)
+  categories    Category[]
+  genres        Genre[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+}
+
+model ExportTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  fields    String
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
